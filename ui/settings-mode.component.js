@@ -3,15 +3,17 @@
 import { startGame } from "../state/data.js";
 
 export function SettingsMode() {
+  console.log("setting load...")
+  
   const element = liba.create("div", ["style__component--setting"]);
 
   SettingsMode.render(element);
 
-  return { element };
+  return { element, cleanup: () => {} };
 }
 
 SettingsMode.render = (element) => {
-
+  console.log("setting load")
   const gridSizeLabel = liba.create("label");
   gridSizeLabel.append("Выберите размер сетки:");
   gridSizeLabel.setAttribute("for", "gridSizeSelect"); 

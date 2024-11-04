@@ -20,22 +20,31 @@ const _state = {
     player1: 0,
     player2: 0,
   },
-  win: ""
+  win: "",
 };
-
 
 
 
 
 let _observers = [];
 
+export function subscribe(callback) {
+  _observers.push(callback);
+  return () => {
+    unsubscribe(callback)
+  }
+}
+
+
+export function unsubscribe(callback) {
+  _observers = _observers.filter((o) => o !== callback);
+}
+
 function _notify() {
   _observers.forEach((o) => o());
 }
 
-export function subscribe(callback) {
-  _observers.push(callback);
-}
+
 
 
 
@@ -53,25 +62,22 @@ export function getPositions() {
 
 export function playAgain() {
   _state.status = GAME_STATUSES.SETTINGS;
-  _state.points.google = '';
-  _state.points.player1 = '';
-  _state.points.player2 = '';
+  _state.points.google = "";
+  _state.points.player1 = "";
+  _state.points.player2 = "";
   _notify();
-  
 }
 
-
-
-
-
-
-
-export function startGame(selectedGridSize, selectedPointsWin, selectedPointsLose) {
+export function startGame(
+  selectedGridSize,
+  selectedPointsWin,
+  selectedPointsLose
+) {
   _state.status = GAME_STATUSES.IN_PROGRESS;
 
   selectingNumberOfGrids(selectedGridSize);
-  selectingNumberWin(selectedPointsWin)
-  selectingNumberLose(selectedPointsLose)
+  selectingNumberWin(selectedPointsWin);
+  selectingNumberLose(selectedPointsLose);
 
   _teleportGoogle();
 
@@ -80,8 +86,6 @@ export function startGame(selectedGridSize, selectedPointsWin, selectedPointsLos
 }
 
 let jumpIntervalId;
-
-
 
 function selectingNumberOfGrids(selectedGridSize) {
   switch (selectedGridSize) {
@@ -130,7 +134,6 @@ function selectingNumberLose(selectedPointsLose) {
  *  player movement function
  */
 
-
 export function movePlayer(playerNumber, direction) {
   const positionReducers = {
     UP: (coords) => {
@@ -177,8 +180,6 @@ export function movePlayer(playerNumber, direction) {
   _notify();
 }
 
-
-
 function _isPlayerInOnePositionWithGoogle(playerNumber) {
   const playerPosition = _state.positions["player" + playerNumber];
   const googlePosition = getPositions().google;
@@ -190,33 +191,22 @@ function _isPlayerInOnePositionWithGoogle(playerNumber) {
 }
 function _catchGoogle(playerNumber) {
   _state.points["player" + playerNumber]++;
-
+  clearInterval(jumpIntervalId);
+  jumpIntervalId = setInterval(_escapeGoogle, 1000);
   _state.points.google--;
 
   if (_state.points["player" + playerNumber] === _state.settings.pointsToWin) {
-    const result = playerNumber === 1 ? "Player 1 Wins!" : "Player 2 Wins!"
-    alert(result)
-    resetPositionPlayers()
+    const result = playerNumber === 1 ? "Player 1 Wins!" : "Player 2 Wins!";
+    alert(result);
+    resetPositionPlayers();
 
     clearInterval(jumpIntervalId);
 
     _state.status = GAME_STATUSES.WIN;
-    console.log(result)
-
-
-
+    console.log(result);
   }
   _teleportGoogle();
-
 }
-
-function win() {
-
-}
-
-
-
-
 
 function _teleportGoogle() {
   const newX = _getRandomInt(getGridSize().columnsCount);
@@ -235,39 +225,34 @@ function _teleportGoogle() {
   _state.points.google++;
 
   if (_state.points.google === _state.settings.pointsToLose) {
-    resetPositionPlayers()
+    resetPositionPlayers();
     _state.status = GAME_STATUSES.LOSE;
     clearInterval(jumpIntervalId);
   }
   _notify();
 }
 
-function resetPositionPlayers () {
-  _state.positions.player1 = { x: 0, y: 0 }
-  _state.positions.player2 = { x: 1, y: 0 }
-
+function resetPositionPlayers() {
+  _state.positions.player1 = { x: 0, y: 0 };
+  _state.positions.player2 = { x: 1, y: 0 };
 }
-
-
 
 function startTimer(playerNumber) {
   if (playerNumber === 1) {
     _state.positions.player2 = { x: 15, y: 15 };
+    
     setTimeout(() => {
-      _state.positions.player2 = { x: _getRandomInt(4), y: _getRandomInt(4) }
-  }, 2000);
+      _state.positions.player2 = { x: _getRandomInt(4), y: _getRandomInt(4) };
+    }, 2000);
   } else {
     _state.positions.player1 = { x: 15, y: 15 };
     setTimeout(() => {
-      _state.positions.player1 = { x: _getRandomInt(4), y: _getRandomInt(4) }
-  }, 2000);
+      _state.positions.player1 = { x: _getRandomInt(4), y: _getRandomInt(4) };
+    }, 2000);
   }
-  
+
   _notify();
 }
-
-
-
 
 function _playersMeeting() {
   return (
@@ -275,10 +260,6 @@ function _playersMeeting() {
     _state.positions.player2.y === _state.positions.player1.y
   );
 }
-
-
-
-
 
 function _isInsideGrid(coords) {
   const isInsideGrid =
@@ -293,8 +274,6 @@ function _isInsideGrid(coords) {
 function _escapeGoogle() {
   _teleportGoogle();
 }
-
-
 
 function _getRandomInt(max) {
   return Math.floor(Math.random() * max);
